@@ -1,0 +1,25 @@
+{
+  // Name 
+  "name": "Azure Sale Analytic",
+  // Docker file destination
+  "dockerFile": "../dockerfile",
+  // Mount workspace
+  "workspaceFolder": "/workspace",
+  // Mount volume
+  "mounts": [
+    "source=${localEnv:HOME}/projects/sale_analytic_azure_terraform/src,target=/workspace,type=bind"
+  ],
+  // Add the environment variables needed for your Terraform project
+  "remoteEnv": {},
+  // Add any extensions you need for your Terraform project
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "hashicorp.terraform"
+      ],
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+      }
+    }
+  }
+}
