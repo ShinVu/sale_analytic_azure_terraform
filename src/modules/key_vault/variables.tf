@@ -96,3 +96,8 @@ variable "vault_secret_db_pass" {
   description = "Database pass"
   sensitive   = true
 }
+
+variable "environment" {
+  type        = string
+  description = "Current environment"
+}
