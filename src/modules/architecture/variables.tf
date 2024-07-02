@@ -115,3 +115,13 @@ variable "storage_account_unity_catalog_name" {
   type        = string
   description = "Name of the storage account for unity catalog"
 }
+
+variable "adf_cluster_id" {
+  type = string 
+  description = "id of the adf cluster"
+}
+
+variable "vault_uri" {
+  type = string 
+  description = "uri of vault"
+}

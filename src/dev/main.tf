@@ -56,6 +56,10 @@ module "architecture" {
   resource_group_name     = module.resource_group.resource_group_name
   # Variables from the module key_vault output
   key_vault_id = module.key_vault.vault_id
+  vault_uri    = module.key_vault.vault_uri
+
+  # Variables from module databricks
+  adf_cluster_id = module.databricks.adf_cluster_id
 
 }
 
@@ -74,7 +78,7 @@ module "databricks" {
   cluster_name = var.module_databrick_cluster_name
 
   # Variables for databrick instances
-  databrick_workspace_id = module.architecture.databrick_workspace_id
+  databrick_workspace_id           = module.architecture.databrick_workspace_id
   databrick_workspace_workspace_id = module.architecture.databrick_workspace_workspace_id
   # Variables for instance pools 
   pool_min_idle_instances         = var.module_databrick_pool_min_idle_instances

@@ -57,6 +57,7 @@ resource "databricks_metastore_data_access" "this" {
   depends_on = [
     databricks_metastore_assignment.databricks_metastore_assignment
   ]
+  force_destroy = true
 }
 
 # Grant bronze layer storage credential 
@@ -253,6 +254,7 @@ resource "databricks_cluster_policy" "databricks_cluster_policy" {
 
 data "databricks_group" "admin" {
   display_name = "admins" // existing admin group in databricks workspace
+  depends_on = [var.databrick_workspace_id]
 }
 
 resource "databricks_service_principal" "sp" {
