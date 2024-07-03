@@ -44,6 +44,9 @@ module "architecture" {
   # Databrick
   var_databrick_workspace_name     = var.module_architecture_var_databrick_workspace_name
   var_databrick_workspace_sku_name = var.module_architecture_var_databrick_workspace_sku_name
+
+  # Databrick cluster for linked services
+  adf_cluster_id = module.databricks.adf_cluster_id
   # Storage account Datalake gen2 
   var_storage_account_name         = var.module_architecture_storage_account_name
   storage_account_replication_type = var.module_architecture_storage_account_replication_type

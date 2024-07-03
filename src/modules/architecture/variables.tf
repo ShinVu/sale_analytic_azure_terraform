@@ -119,3 +119,8 @@ variable "storage_account_unity_catalog_name" {
 variable "vault_uri" {
   type = string
 }
+
+variable "adf_cluster_id" {
+  type = string
+  
+}

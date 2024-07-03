@@ -157,9 +157,9 @@ resource "databricks_external_location" "gold_layer" {
 
 # Create a catalog 
 resource "databricks_catalog" "sandbox" {
-  name    = "sandbox"
-  storage_root = "${databricks_external_location.sandbox_catalog.url}"
-  comment = "this catalog is managed by terraform"
+  name         = "sandbox"
+  storage_root = databricks_external_location.sandbox_catalog.url
+  comment      = "this catalog is managed by terraform"
   properties = {
     purpose = "dev"
   }
@@ -209,56 +209,56 @@ resource "databricks_volume" "sandbox_default_gold_layer" {
   provider         = databricks.workspace
 }
 
-# ## Create cluster, instance pools after workspace is assigned to metastore
+## Create cluster, instance pools after workspace is assigned to metastore
 
-# # Create databrick instance pool
-# resource "databricks_instance_pool" "smallest_nodes" {
-#   instance_pool_name = "dev-pool-(${data.databricks_current_user.current_user.alphanumeric})"
-#   min_idle_instances = var.pool_autotermination_minutes
-#   max_capacity       = var.pool_max_capacity
-#   node_type_id       = data.databricks_node_type.smallest.id
-#   preloaded_spark_versions = [
-#     data.databricks_spark_version.latest.id
-#   ]
+# Create databrick instance pool
+resource "databricks_instance_pool" "smallest_nodes" {
+  instance_pool_name = "dev-pool-(${data.databricks_current_user.current_user.alphanumeric})"
+  min_idle_instances = var.pool_autotermination_minutes
+  max_capacity       = var.pool_max_capacity
+  node_type_id       = data.databricks_node_type.smallest.id
+  preloaded_spark_versions = [
+    data.databricks_spark_version.latest.id
+  ]
 
-#   idle_instance_autotermination_minutes = var.pool_autotermination_minutes
-#   depends_on                            = [databricks_metastore_assignment.databricks_metastore_assignment]
-# }
-
-
-# # Create a databricks cluster for ADF linked services
-# resource "databricks_cluster" "databrick_adf_cluster" {
-#   cluster_name            = "adf_cluster"
-#   spark_version           = data.databricks_spark_version.latest.id
-#   instance_pool_id        = databricks_instance_pool.smallest_nodes.id
-#   autotermination_minutes = var.cluster_autotermination_minutes
-#   spark_conf = {
-#     # Single-node
-#     "spark.databricks.cluster.profile" : "singleNode"
-#     "spark.master" : "local[*]"
-#   }
-#   data_security_mode = "SINGLE_USER"
-#   custom_tags = {
-#     "ResourceClass" = "SingleNode"
-#   }
-#   depends_on = [databricks_metastore_assignment.databricks_metastore_assignment]
-# }
+  idle_instance_autotermination_minutes = var.pool_autotermination_minutes
+  provider                              = databricks.workspace
+}
 
 
-# # Create databricks cluster policy
-# resource "databricks_cluster_policy" "databricks_cluster_policy" {
-#   name = "dev-minimal-(${data.databricks_current_user.current_user.alphanumeric})"
-#   definition = jsonencode({
-#     "dbus_per_hour" : {
-#       "type" : "range",
-#       "maxValue" : 10
-#     },
-#     "autotermination_minutes" : {
-#       "type" : "fixed",
-#       "value" : 10,
-#       "hidden" : true
-#     }
-#   })
-#   depends_on = [databricks_metastore_assignment.databricks_metastore_assignment]
-# }
+# Create a databricks cluster for ADF linked services
+resource "databricks_cluster" "databrick_adf_cluster" {
+  cluster_name            = "adf_cluster"
+  spark_version           = data.databricks_spark_version.latest.id
+  instance_pool_id        = databricks_instance_pool.smallest_nodes.id
+  autotermination_minutes = var.cluster_autotermination_minutes
+  spark_conf = {
+    # Single-node
+    "spark.databricks.cluster.profile" : "singleNode"
+    "spark.master" : "local[*]"
+  }
+  data_security_mode = "SINGLE_USER"
+  custom_tags = {
+    "ResourceClass" = "SingleNode"
+  }
+  provider = databricks.workspace
+}
+
+
+# Create databricks cluster policy
+resource "databricks_cluster_policy" "databricks_cluster_policy" {
+  name = "dev-minimal-(${data.databricks_current_user.current_user.alphanumeric})"
+  definition = jsonencode({
+    "dbus_per_hour" : {
+      "type" : "range",
+      "maxValue" : 10
+    },
+    "autotermination_minutes" : {
+      "type" : "fixed",
+      "value" : 10,
+      "hidden" : true
+    }
+  })
+  provider = databricks.workspace
+}
 

@@ -138,25 +138,17 @@ resource "azurerm_data_factory_credential_user_managed_identity" "data_factory_d
   annotations = ["Databricks workspace", "Data factory"]
 }
 
-# # Linked services to Databricks
-# resource "azurerm_data_factory_linked_service_azure_databricks" "linked_services_databricks" {
-#   name            = "databricks"
-#   data_factory_id = azurerm_data_factory.data_factory.id
-#   description     = "ADB Linked Service via MSI"
-#   adb_domain      = "https://${azurerm_databricks_workspace.databrick_workspace.workspace_url}"
+# Linked services to Databricks
+resource "azurerm_data_factory_linked_service_azure_databricks" "linked_services_databricks" {
+  name            = "databricks"
+  data_factory_id = azurerm_data_factory.data_factory.id
+  description     = "ADB Linked Service via MSI"
+  adb_domain      = "https://${azurerm_databricks_workspace.databrick_workspace.workspace_url}"
 
-#   msi_work_space_resource_id = azurerm_databricks_workspace.databrick_workspace.id
+  msi_work_space_resource_id = azurerm_databricks_workspace.databrick_workspace.id
 
-#   existing_cluster_id = var.adf_cluster_id
-# }
-
-# # Create a group that have full access to bronze_container 
-# # Create a group in EntraID
-# resource "azuread_group" "bronze_writer" {
-#   display_name     = "bronze_writer"
-#   owners           = [data.azurerm_client_config.current.object_id]
-#   security_enabled = true
-# }
+  existing_cluster_id = var.adf_cluster_id
+}
 
 
 # Create a managed identity for data factory to access key vault
