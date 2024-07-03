@@ -83,7 +83,6 @@ module "databricks" {
 
   # Variables for databrick instances
   databrick_workspace_id           = module.architecture.databrick_workspace_id
-  databrick_workspace_id           = module.architecture.databrick_workspace_id
   databrick_workspace_workspace_id = module.architecture.databrick_workspace_workspace_id
   # Variables for instance pools 
   pool_min_idle_instances         = var.module_databrick_pool_min_idle_instances

@@ -46,110 +46,6 @@ resource "azurerm_data_factory" "data_factory" {
   }
 }
 
-## Integration runtime ##
-# Create an self hosted integration runtime to copy data from on premise database #
-resource "azurerm_data_factory_integration_runtime_self_hosted" "self_hosted_integration_runtime" {
-  name            = "self-hosted-integration-runtime"
-  data_factory_id = azurerm_data_factory.data_factory.id
-}
-
-## Linked services ##
-# Create linked services to data sources and compute #
-
-# Use custom linked service because azurerm_data_factory_linked_service_key_vault doesn't support UMI yet
-# Ideally, azurerm_data_factory_linked_service_key_vault should have been used. Azurerm 3.104.2 and below does not support setting user managed identity so we use a custom linked service for now.
-resource "azurerm_data_factory_linked_custom_service" "linked_services_key_vault_custom" {
-  name                 = "linked_services_key_vault_custom"
-  data_factory_id      = azurerm_data_factory.data_factory.id
-  type                 = "AzureKeyVault"
-  type_properties_json = <<JSON
-{
-  "baseUrl": "${var.vault_uri}",
-  "credential": {
-    "referenceName": "${azurerm_data_factory_credential_user_managed_identity.data_factory_key_vault_identity_credentials.name}",
-    "type": "CredentialReference"
-    }      
-}
-JSON
-}
-
-# Linked services to SQL server
-resource "azurerm_data_factory_linked_service_sql_server" "linked_servies_sql_server" {
-  name            = "sql_server"
-  data_factory_id = azurerm_data_factory.data_factory.id
-
-  connection_string = "Integrated Security=False;Data Source=localhost;Initial Catalog=AdventureWorks;User ID=dat;"
-  key_vault_password {
-    linked_service_name = azurerm_data_factory_linked_custom_service.linked_services_key_vault_custom.name
-    secret_name         = "db-password"
-  }
-}
-
-# Linked services to Data lake gen2
-# Ideally, azurerm_data_factory_linked_service_data_lake_storage_gen2 should have been used. Azurerm 3.104.2 and below does not support setting user managed identity so we use a custom linked service for now.
-
-resource "azurerm_data_factory_linked_custom_service" "linked_services_data_lake_storage_gen2_custom" {
-  name                 = "linked_services_data_lake_storage_gen2_custom"
-  data_factory_id      = azurerm_data_factory.data_factory.id
-  type                 = "AzureBlobFS"
-  type_properties_json = <<JSON
-{
-    "url": "${azurerm_storage_account.storage_account.primary_dfs_endpoint}", 
-    "credential": {
-        "referenceName": "${azurerm_data_factory_credential_user_managed_identity.data_factory_bronze_container_identity_credentials.name}",
-        "type": "CredentialReference"
-    }
-}
-JSON
-}
-
-### Data factory resources ###
-
-## Credentials ##
-## Assign necessary credentials to data factory instance ##
-
-# Credential for Key vault managed identity
-resource "azurerm_data_factory_credential_user_managed_identity" "data_factory_key_vault_identity_credentials" {
-  name            = azurerm_user_assigned_identity.data_factory_key_vault.name
-  description     = "Credential for azure data factory to access key vault"
-  data_factory_id = azurerm_data_factory.data_factory.id
-  identity_id     = azurerm_user_assigned_identity.data_factory_key_vault.id
-
-  annotations = ["Key vault", "Data factory"]
-}
-
-# Credential for Bronze container managed identity
-resource "azurerm_data_factory_credential_user_managed_identity" "data_factory_bronze_container_identity_credentials" {
-  name            = azurerm_user_assigned_identity.data_factory_bronze_container.name
-  description     = "Credential for azure data factory to access bronze container"
-  data_factory_id = azurerm_data_factory.data_factory.id
-  identity_id     = azurerm_user_assigned_identity.data_factory_bronze_container.id
-
-  annotations = ["Bronze container", "Data factory"]
-}
-
-# Credential for Databricks managed identity
-resource "azurerm_data_factory_credential_user_managed_identity" "data_factory_databricks_identity_credentials" {
-  name            = azurerm_user_assigned_identity.adf_databrick_identity.name
-  description     = "Credential for azure data factory to access databricks workspace"
-  data_factory_id = azurerm_data_factory.data_factory.id
-  identity_id     = azurerm_user_assigned_identity.adf_databrick_identity.id
-
-  annotations = ["Databricks workspace", "Data factory"]
-}
-
-# Linked services to Databricks
-resource "azurerm_data_factory_linked_service_azure_databricks" "linked_services_databricks" {
-  name            = "databricks"
-  data_factory_id = azurerm_data_factory.data_factory.id
-  description     = "ADB Linked Service via MSI"
-  adb_domain      = "https://${azurerm_databricks_workspace.databrick_workspace.workspace_url}"
-
-  msi_work_space_resource_id = azurerm_databricks_workspace.databrick_workspace.id
-
-  existing_cluster_id = var.adf_cluster_id
-}
-
 
 # Create a managed identity for data factory to access key vault
 resource "azurerm_user_assigned_identity" "data_factory_key_vault" {
@@ -299,7 +195,6 @@ resource "azuread_group" "bronze_writer" {
   security_enabled = true
 }
 
-## Linked services for 
 # Add managed identity data_factory_bronze_container to group
 resource "azuread_group_member" "data_factory_bronze_container_group_bronze_writer" {
   group_object_id  = azuread_group.bronze_writer.id

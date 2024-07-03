@@ -158,7 +158,7 @@ resource "databricks_external_location" "gold_layer" {
 # Create a catalog 
 resource "databricks_catalog" "sandbox" {
   name         = "sandbox"
-  storage_root = databricks_external_location.sandbox_catalog.url
+  storage_root = "${databricks_external_location.sandbox_catalog.url}"
   comment      = "this catalog is managed by terraform"
   properties = {
     purpose = "dev"
