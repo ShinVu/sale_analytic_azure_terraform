@@ -57,14 +57,15 @@ module "architecture" {
   # Variables from the module key_vault output
   key_vault_id = module.key_vault.vault_id
   vault_uri    = module.key_vault.vault_uri
-
-  # Variables from module databricks
-  adf_cluster_id = module.databricks.adf_cluster_id
-
 }
 
 module "databricks" {
   source = "../modules/databricks" # Local path to module databricks
+
+  providers = {
+    databricks.account   = databricks.account
+    databricks.workspace = databricks.workspace
+  }
 
   # Variables from the module key_vault output
   key_vault_id  = module.key_vault.vault_id
@@ -78,6 +79,7 @@ module "databricks" {
   cluster_name = var.module_databrick_cluster_name
 
   # Variables for databrick instances
+  databrick_workspace_id           = module.architecture.databrick_workspace_id
   databrick_workspace_id           = module.architecture.databrick_workspace_id
   databrick_workspace_workspace_id = module.architecture.databrick_workspace_workspace_id
   # Variables for instance pools 

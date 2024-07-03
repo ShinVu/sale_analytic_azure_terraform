@@ -27,7 +27,19 @@ provider "azurerm" {
   }
 }
 
-# Define host URL for databricks provider
+# Define host URL for databricks providerazure_workspace_resource_id = azurerm_databricks_workspace.this.id
+
+# Account provider  
 provider "databricks" {
-  host = module.architecture.databrick_workspace_url
+  alias = "account"
+  host  = "https://accounts.azuredatabricks.net"
+}
+
+# Workspace provider to the created azure databricks workspace
+# Authenticate using token generated from az login 
+# Check https://registry.terraform.io/providers/databricks/databricks/latest/docs#empty-provider-block for more information
+provider "databricks" {
+  alias                       = "workspace"
+  host                        = module.architecture.databrick_workspace_url
+  azure_workspace_resource_id = module.architecture.databrick_workspace_id
 }

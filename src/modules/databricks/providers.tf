@@ -5,7 +5,8 @@ terraform {
   required_providers {
     #Databricks provider for interacting with azure databricks
     databricks = {
-      source = "databricks/databricks"
+      source                = "databricks/databricks"
+      configuration_aliases = [databricks.workspace, databricks.account]
     }
   }
 }
