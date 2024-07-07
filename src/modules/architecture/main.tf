@@ -150,7 +150,9 @@ resource "azurerm_data_factory_linked_service_sql_server" "linked_servies_sql_se
   name            = "sql_server"
   data_factory_id = azurerm_data_factory.data_factory.id
 
-  connection_string = "Integrated Security=False;Data Source=localhost;Initial Catalog=AdventureWorks;User ID=dat;"
+  #Integration runtime name
+  integration_runtime_name = azurerm_data_factory_integration_runtime_self_hosted.self_hosted_integration_runtime.name
+  connection_string        = "Integrated Security=False;Data Source=localhost;Initial Catalog=AdventureWorks;User ID=dat;"
   key_vault_password {
     linked_service_name = azurerm_data_factory_linked_custom_service.linked_services_key_vault_custom.name
     secret_name         = "db-password"
